@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password #required
+      MYSQL_DATABASE: webflux-playground #optional
+      MYSQL_USER: player #optional
+      MYSQL_PASSWORD: player_password #optional
+      # MYSQL_ALLOW_EMPTY_PASSWORD: "yes" #optional
+      # MYSQL_RANDOM_ROOT_PASSWORD: "yes" #optional
+      # MYSQL_ONETIME_PASSWORD: "yes" #optional (MySQL 5.6 or above)
+      # MYSQL_INITDB_SKIP_TZINFO: "" #optional
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./conf:/etc/mysql/conf.d

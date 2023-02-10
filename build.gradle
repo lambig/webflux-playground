@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'io.github.lambig'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '19'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //Spring
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    //Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    //JAsync-sql
+    implementation 'com.github.jasync-sql:jasync-mysql:2.1.23'
+    implementation 'com.github.jasync-sql:jasync-r2dbc-mysql:2.1.23'
+    implementation 'com.github.jasync-sql:jasync-pool:1.2.2'
+    // In case I use r2dbc-mysql(not maintained recently)
+//	implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
+    // Do I really need this?
+    runtimeOnly "mysql:mysql-connector-java"
+    //Spring Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    //Project Reactor Test
+    testImplementation 'io.projectreactor:reactor-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.register('restartDB') {
+    "docker-compose restart".execute()
+}
+
+tasks.register('stopDB') {
+    "docker-compose stop".execute()
+}
+/**
+ * restart docker mysql before bootrun starts
+ * stop it after bootrun ends
+ */
+bootRun {
+    dependsOn "restartDB"
+    finalizedBy "stopDB"
+}
