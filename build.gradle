@@ -27,6 +27,8 @@ dependencies {
   //Lombok
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
+  // Jackson
+  implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
   //JAsync-sql
   implementation 'com.github.jasync-sql:jasync-mysql:2.1.23'
   implementation 'com.github.jasync-sql:jasync-r2dbc-mysql:2.1.23'
@@ -38,11 +40,16 @@ dependencies {
   implementation 'org.flywaydb:flyway-core:8.2.0'
   // implementation 'org.flywaydb:flyway-mysql:8.2.0'
 
-
   //Spring Test
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   //Project Reactor Test
   testImplementation 'io.projectreactor:reactor-test'
+
+  //Utilities
+  implementation 'io.github.lambig:Either:0.1.0'
+  implementation 'io.github.lambig:Patterns:1.1.0'
+  implementation 'io.github.lambig:functional-interface-extension:1.1.2'
+  implementation 'io.github.lambig:Tuplite:1.0.0'
 }
 
 tasks.named('test') {

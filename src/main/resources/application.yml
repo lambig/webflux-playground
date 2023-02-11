@@ -10,4 +10,5 @@ spring:
     user: player
     password: player_password
     baseline-on-migrate: true
+    enabled: false
 
