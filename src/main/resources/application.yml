@@ -2,6 +2,12 @@ server:
   port: 9001
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/webflux-playground
+    url: r2dbc:pool:mysql://localhost:3306/webflux-playground
     username: player
     password: player_password
+  flyway:
+    url: jdbc:mysql://localhost:3306/webflux-playground
+    user: player
+    password: player_password
+    baseline-on-migrate: true
+

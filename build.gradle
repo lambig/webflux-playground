@@ -1,60 +1,92 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.0.2'
-    id 'io.spring.dependency-management' version '1.1.0'
+  id 'java'
+  id 'org.springframework.boot' version '3.0.2'
+  id 'io.spring.dependency-management' version '1.1.0'
+  id 'org.flywaydb.flyway' version '8.2.0'
 }
 
 group = 'io.github.lambig'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+sourceCompatibility = '19' // CAUTION: NOT an LTS
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    //Spring
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    //Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    //JAsync-sql
-    implementation 'com.github.jasync-sql:jasync-mysql:2.1.23'
-    implementation 'com.github.jasync-sql:jasync-r2dbc-mysql:2.1.23'
-    implementation 'com.github.jasync-sql:jasync-pool:1.2.2'
-    // In case I use r2dbc-mysql(not maintained recently)
-//	implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
-    // Do I really need this?
-    runtimeOnly "mysql:mysql-connector-java"
-    //Spring Test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    //Project Reactor Test
-    testImplementation 'io.projectreactor:reactor-test'
+  //Spring
+  implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+  implementation 'org.springframework.boot:spring-boot-starter-webflux'
+  implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+  //Lombok
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+  //JAsync-sql
+  implementation 'com.github.jasync-sql:jasync-mysql:2.1.23'
+  implementation 'com.github.jasync-sql:jasync-r2dbc-mysql:2.1.23'
+  implementation 'com.github.jasync-sql:jasync-pool:1.2.2'
+  // In case I use r2dbc-mysql(not maintained recently)
+  // implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
+  // Flyway with jdbc
+  implementation "mysql:mysql-connector-java"
+  implementation 'org.flywaydb:flyway-core:8.2.0'
+  // implementation 'org.flywaydb:flyway-mysql:8.2.0'
+
+
+  //Spring Test
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  //Project Reactor Test
+  testImplementation 'io.projectreactor:reactor-test'
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 tasks.register('restartDB') {
+  Task me = it
+  doLast {
+    println me.name + ": db restarting... hopefully"
     "docker-compose restart".execute()
+  }
 }
 
 tasks.register('stopDB') {
+  Task me = it
+  doLast {
     "docker-compose stop".execute()
+    println me.name + ": db stopped... hopefully"
+  }
 }
-/**
- * restart docker mysql before bootrun starts
- * stop it after bootrun ends
- */
-bootRun {
-    dependsOn "restartDB"
-    finalizedBy "stopDB"
+
+flyway {
+  baselineVersion = 0
+  url = "jdbc:mysql://localhost:3306/webflux-playground"
+  user = "player"
+  password = "player_password"
+}
+
+def dbRequiringTasks = [
+  // application
+  bootRun,
+  // migration
+  flywayBaseline,
+  flywayClean,
+  flywayInfo,
+  flywayMigrate,
+  flywayRepair,
+  flywayUndo,
+  flywayValidate
+]
+
+/* restart docker mysql before bootrun starts / stop it after bootrun ends */
+dbRequiringTasks.forEach {
+//  it.dependsOn restartDB
+//  it.finalizedBy stopDB
 }
