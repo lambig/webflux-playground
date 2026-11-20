@@ -1,13 +1,18 @@
 plugins {
   id 'java'
-  id 'org.springframework.boot' version '3.0.2'
-  id 'io.spring.dependency-management' version '1.1.0'
-  id 'org.flywaydb.flyway' version '8.2.0'
+  id 'org.springframework.boot' version '3.5.16'
+  id 'io.spring.dependency-management' version '1.1.7'
+  id 'org.flywaydb.flyway' version '11.20.3'
 }
+
+// Patched compatible BOM lines for advisories newer than Spring Boot 3.5.16.
+ext['jackson-bom.version'] = '2.21.8'
+ext['netty.version'] = '4.1.139.Final'
+ext['log4j2.version'] = '2.25.5'
 
 group = 'io.github.lambig'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19' // CAUTION: NOT an LTS
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
 configurations {
   compileOnly {
@@ -28,7 +33,7 @@ dependencies {
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
   // Jackson
-  implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
+  implementation 'com.fasterxml.jackson.core:jackson-core'
   //JAsync-sql
   implementation 'com.github.jasync-sql:jasync-mysql:2.1.23'
   implementation 'com.github.jasync-sql:jasync-r2dbc-mysql:2.1.23'
@@ -36,8 +41,9 @@ dependencies {
   // In case I use r2dbc-mysql(not maintained recently)
   // implementation 'dev.miku:r2dbc-mysql:0.8.2.RELEASE'
   // Flyway with jdbc
-  implementation "mysql:mysql-connector-java"
-  implementation 'org.flywaydb:flyway-core:8.2.0'
+  runtimeOnly "com.mysql:mysql-connector-j"
+  implementation 'org.flywaydb:flyway-core'
+  implementation 'org.flywaydb:flyway-mysql'
   // implementation 'org.flywaydb:flyway-mysql:8.2.0'
 
   //Spring Test
@@ -88,7 +94,6 @@ def dbRequiringTasks = [
   flywayInfo,
   flywayMigrate,
   flywayRepair,
-  flywayUndo,
   flywayValidate
 ]
 
