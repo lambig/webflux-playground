@@ -38,3 +38,14 @@ jobs:
             **/build/reports/tests/test/**
           if-no-files-found: error
           retention-days: 14
+      - name: Build and check development MySQL
+        run: |
+          docker build -t mysql-ci docker/mysql
+          docker run -d --name mysql-ci -e MYSQL_ROOT_PASSWORD=synthetic-ci-only mysql-ci
+          ready=false
+          for attempt in $(seq 1 60); do
+            if docker exec mysql-ci mysqladmin ping -uroot -psynthetic-ci-only --silent; then ready=true; break; fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then docker logs mysql-ci; exit 1; fi
+          docker exec mysql-ci mysql -uroot -psynthetic-ci-only -e 'CREATE DATABASE security_smoke; CREATE TABLE security_smoke.items (id INT PRIMARY KEY); INSERT INTO security_smoke.items VALUES (1); SELECT * FROM security_smoke.items;'
